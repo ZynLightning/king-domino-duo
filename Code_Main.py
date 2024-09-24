@@ -1,7 +1,7 @@
 import cv2 as cv
 import numpy as np
 
-BGRimage = cv.imread("2.jpg")
+BGRimage = cv.imread("1.jpg") #choose image
 HSVimage = cv.cvtColor(BGRimage,cv.COLOR_BGR2HSV)
 board=np.zeros((5,5), dtype=str)
 for i in range(5):
