@@ -43,6 +43,7 @@ board=np.zeros((5,5), dtype=str)
         elif mineValue==np.max([oceanValue,grassLandValue,forestValue,fieldValue,wasteValue,mineValue]):
             board[i,j]="Mi"#Mines
          """
+
 #thresholds for the different biomes:
 oceanMin=np.array([102, 0, 0]) #Lowhue, LowSat, LowVal
 oceanMax=np.array([111, 255, 255])#HighHue, HighSat, HighVal
@@ -84,11 +85,11 @@ mineOpen=cv.morphologyEx(mineMask,cv.MORPH_OPEN,kernel)
 
 #show the opened images:
 cv.imshow("oceanOpen",oceanOpen)
-cv.imshow("grassOpen",grassOpen)
-cv.imshow("forestOpen",forestOpen)
-cv.imshow("fieldOpen",fieldOpen)
-cv.imshow("wasteOpen",wasteOpen)
-cv.imshow("mineOpen",mineOpen)
+#cv.imshow("grassOpen",grassOpen)
+#cv.imshow("forestOpen",forestOpen)
+#cv.imshow("fieldOpen",fieldOpen)
+#cv.imshow("wasteOpen",wasteOpen)
+#cv.imshow("mineOpen",mineOpen)
 
 #show the thresholded masks:
 #cv.imshow("oceanMask",oceanMask)
@@ -98,7 +99,22 @@ cv.imshow("mineOpen",mineOpen)
 #cv.imshow("wasteMask",wasteMask)
 #cv.imshow("mineMask",mineMask)
 cv.waitKey(0)
-
+f=0
+for i in range(5): #Finding the biome of each square: 
+    for j in range(5):
+        oceanValue=0
+        grassLandValue=0
+        forestValue=0
+        fieldValue=0
+        wasteValue=0
+        mineValue=0
+        for y, row in enumerate(HSVimage[100*i:100*(i+1),100*j:100*(j+1)]):
+            for x, pixel in enumerate(row):
+                print(f)
+                f+=1
+                if oceanOpen[y,x]!=0:
+                    print(oceanOpen[y,x])
+                    
 
 
 
