@@ -6,7 +6,7 @@ HSVimage = cv.cvtColor(BGRimage,cv.COLOR_BGR2HSV)
 board=np.zeros((5,5), dtype=str)
 
 
-for i in range(5): #Finding the biome of each square: #overvej at lave et threshold billede for hvert biome til troubleshooting og brug af opening, reduction osv.
+""" for i in range(5): #Finding the biome of each square: #overvej at lave et threshold billede for hvert biome til troubleshooting og brug af opening, reduction osv.
     for j in range(5):
         oceanValue=0
         grassLandValue=0
@@ -42,8 +42,66 @@ for i in range(5): #Finding the biome of each square: #overvej at lave et thresh
             board[i,j]="Wa"#Wateland
         elif mineValue==np.max([oceanValue,grassLandValue,forestValue,fieldValue,wasteValue,mineValue]):
             board[i,j]="Mi"#Mines
-        
-        #print(f"[{j+1},{i+1}] oceanVal={oceanValue}, grassVal={grassLandValue}, forestVal={forestValue}, fieldVal={fieldValue}, wasteVal={wasteValue}, mineVal={mineValue}")
+         """
+#thresholds for the different biomes:
+oceanMin=np.array([102, 0, 0]) #Lowhue, LowSat, LowVal
+oceanMax=np.array([111, 255, 255])#HighHue, HighSat, HighVal
+
+grassMin=np.array([(53/255*180),0,130])
+grassMax=np.array([(87/255*180),255,255])
+
+forestMin=np.array([(49/255*180),0,0])
+forestMax=np.array([(87/255*180),210,85])
+
+fieldMin=np.array([(26/255*180),223,168])
+fieldMax=np.array([(41/255*180),255,255])
+
+wasteMin=np.array([(16/255*180),0,51])
+wasteMax=np.array([(34/255*180),172,151])
+
+mineMin=np.array([0,0,0])
+mineMax=np.array([31,113,79])
+
+#laver thresholds på alle biomes:
+oceanMask=cv.inRange(HSVimage, oceanMin, oceanMax) 
+grassMask=cv.inRange(HSVimage,grassMin,grassMax)
+forestMask=cv.inRange(HSVimage,forestMin,forestMax)
+fieldMask=cv.inRange(HSVimage,fieldMin,fieldMax)
+wasteMask=cv.inRange(HSVimage,wasteMin,wasteMax)
+mineMask=cv.inRange(HSVimage,mineMin,mineMax)
+
+#create a kernel:
+#kernel = cv.getStructuringElement(cv.MORPH_RECT,(5,5)) #laver en rektangulær 5x5 kernel
+kernel = cv.getStructuringElement(cv.MORPH_ELLIPSE,(5,5)) # laver en cirkulær 5x5 kernel
+
+#first erode then dilate the masks, creating an opened image:
+oceanOpen=cv.morphologyEx(oceanMask,cv.MORPH_OPEN,kernel)
+grassOpen=cv.morphologyEx(grassMask,cv.MORPH_OPEN,kernel)
+forestOpen=cv.morphologyEx(forestMask,cv.MORPH_OPEN,kernel)
+fieldOpen=cv.morphologyEx(fieldMask,cv.MORPH_OPEN,kernel)
+wasteOpen=cv.morphologyEx(wasteMask,cv.MORPH_OPEN,kernel)
+mineOpen=cv.morphologyEx(mineMask,cv.MORPH_OPEN,kernel)
+
+#show the opened images:
+cv.imshow("oceanOpen",oceanOpen)
+cv.imshow("grassOpen",grassOpen)
+cv.imshow("forestOpen",forestOpen)
+cv.imshow("fieldOpen",fieldOpen)
+cv.imshow("wasteOpen",wasteOpen)
+cv.imshow("mineOpen",mineOpen)
+
+#show the thresholded masks:
+#cv.imshow("oceanMask",oceanMask)
+#cv.imshow("grassMask",grassMask)
+#cv.imshow("forestMask",forestMask)
+#cv.imshow("fieldMask",fieldMask)
+#cv.imshow("wasteMask",wasteMask)
+#cv.imshow("mineMask",mineMask)
+cv.waitKey(0)
+
+
+
+
 
 #brug blob-analyse til at finde sammenhængende biomes i vores matrix:
 
