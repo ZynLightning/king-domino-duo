@@ -5,45 +5,6 @@ BGRimage = cv.imread("1.jpg") #choose image
 HSVimage = cv.cvtColor(BGRimage,cv.COLOR_BGR2HSV)
 board=np.zeros((5,5), dtype=str)
 
-
-""" for i in range(5): #Finding the biome of each square: #overvej at lave et threshold billede for hvert biome til troubleshooting og brug af opening, reduction osv.
-    for j in range(5):
-        oceanValue=0
-        grassLandValue=0
-        forestValue=0
-        fieldValue=0
-        wasteValue=0
-        mineValue=0
-        for row in HSVimage[100*i:100*(i+1),100*j:100*(j+1)]:
-            for pixel in row:
-                if 102<pixel[0]<111: #check if the pixel is typical for ocean
-                    oceanValue+=1
-                elif (53/255*180)<pixel[0]<(79/255*180) and 130<pixel[2]<255:#check if the pixel is typical for grassland
-                    grassLandValue+=1
-                elif (49/255*180)<pixel[0]<(87/255*180) and pixel[1]<210 and pixel[2]<85:#check if the pixel is typical for forest
-                    forestValue+=1
-                elif (26/255*180)<pixel[0]<(41/255*180) and 223<pixel[1]<255 and 168<pixel[2]:#check if the pixel is typical for field
-                    fieldValue+=1
-                elif (16/255*180)<pixel[0]<(34/255*180) and pixel[1]<172 and 51<pixel[2]<151:#check if the pixel is typical for wasteland
-                    wasteValue+=1
-                elif pixel[0]<(44/255*180) and pixel[1]<113 and pixel[2]<79:#check if the pixel is typical for mines
-                    mineValue+=1
-        if 1000>np.max([oceanValue,grassLandValue,forestValue,fieldValue,wasteValue,mineValue]): #if it is not typical for anything else, it's probably the king piece
-            board[i,j]="Ki"#kingpiece      
-        elif oceanValue==np.max([oceanValue,grassLandValue,forestValue,fieldValue,wasteValue,mineValue]): #if there are more values for ocean than any other, then it's an ocean piece
-            board[i,j]="Oc"#Ocean
-        elif grassLandValue==np.max([oceanValue,grassLandValue,forestValue,fieldValue,wasteValue,mineValue]):
-            board[i,j]="Gr"#Grassland
-        elif forestValue==np.max([oceanValue,grassLandValue,forestValue,fieldValue,wasteValue,mineValue]):
-            board[i,j]="Fo"#Forest
-        elif fieldValue==np.max([oceanValue,grassLandValue,forestValue,fieldValue,wasteValue,mineValue]):
-            board[i,j]="Ag"#Agriculture
-        elif wasteValue==np.max([oceanValue,grassLandValue,forestValue,fieldValue,wasteValue,mineValue]):
-            board[i,j]="Wa"#Wateland
-        elif mineValue==np.max([oceanValue,grassLandValue,forestValue,fieldValue,wasteValue,mineValue]):
-            board[i,j]="Mi"#Mines
-         """
-
 #thresholds for the different biomes:
 oceanMin=np.array([102, 0, 0]) #Lowhue, LowSat, LowVal
 oceanMax=np.array([111, 255, 255])#HighHue, HighSat, HighVal
@@ -99,22 +60,45 @@ cv.imshow("grassMask",grassMask)
 #cv.imshow("wasteMask",wasteMask)
 #cv.imshow("mineMask",mineMask)
 cv.waitKey(0)
-f=0
-for i in range(5): #Finding the biome of each square: 
-    for j in range(5):
+
+#Finding the biome of each square: 
+for i in range(5): #for each row
+    for j in range(5): #for each square in the row
         oceanValue=0
         grassLandValue=0
         forestValue=0
         fieldValue=0
         wasteValue=0
         mineValue=0
-        for y, row in enumerate(HSVimage[100*i:100*(i+1),100*j:100*(j+1)]):
-            for x, pixel in enumerate(row):
-                print(f)
-                f+=1
-                if oceanOpen[y,x]!=0:
-                    print(oceanOpen[y,x])
-                    
+        for y in range(100): #for each pixelrow
+            for x in range(100): #for each pixel in row
+                if oceanOpen[y+i*100,x+j*100]!=0: #if the pixel looks like ocean
+                    oceanValue+=1
+                elif grassMask[y+i*100,x+j*100]!=0: #if the pixel looks like grassLand
+                    grassLandValue+=1
+                elif forestMask[y+i*100,x+j*100]!=0: #if the pixel looks like grassLand
+                    forestValue+=1
+                elif fieldMask[y+i*100,x+j*100]!=0: #if the pixel looks like grassLand
+                    fieldValue+=1
+                elif wasteMask[y+i*100,x+j*100]!=0: #if the pixel looks like grassLand
+                    wasteValue+=1
+                elif mineMask[y+i*100,x+j*100]!=0: #if the pixel looks like grassLand
+                    mineValue+=1
+            if 1000>np.max([oceanValue,grassLandValue,forestValue,fieldValue,wasteValue,mineValue]): #if it is not typical for anything else, it's probably the king piece
+                board[i,j]="Ki"#kingpiece      
+            elif oceanValue==np.max([oceanValue,grassLandValue,forestValue,fieldValue,wasteValue,mineValue]): #if there are more values for ocean than any other, then it's an ocean piece
+                board[i,j]="Oc"#Ocean
+            elif grassLandValue==np.max([oceanValue,grassLandValue,forestValue,fieldValue,wasteValue,mineValue]):
+                board[i,j]="Gr"#Grassland
+            elif forestValue==np.max([oceanValue,grassLandValue,forestValue,fieldValue,wasteValue,mineValue]):
+                board[i,j]="Fo"#Forest
+            elif fieldValue==np.max([oceanValue,grassLandValue,forestValue,fieldValue,wasteValue,mineValue]):
+                board[i,j]="Ag"#Agriculture
+            elif wasteValue==np.max([oceanValue,grassLandValue,forestValue,fieldValue,wasteValue,mineValue]):
+                board[i,j]="Wa"#Wateland
+            elif mineValue==np.max([oceanValue,grassLandValue,forestValue,fieldValue,wasteValue,mineValue]):
+                board[i,j]="Mi"#Mines
+
 
 
 
