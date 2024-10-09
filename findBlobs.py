@@ -1,7 +1,7 @@
 import cv2 as cv
 import numpy as np
 
-BGRimage = cv.imread("1.jpg") #choose image
+BGRimage = cv.imread("2.jpg") #choose image
 HSVimage = cv.cvtColor(BGRimage,cv.COLOR_BGR2HSV)
 board=np.zeros((5,5), dtype=str)
 
@@ -45,21 +45,21 @@ wasteOpen=cv.morphologyEx(wasteMask,cv.MORPH_OPEN,kernel)
 mineOpen=cv.morphologyEx(mineMask,cv.MORPH_OPEN,kernel)
 
 #show the opened images:
-cv.imshow("oceanOpen",oceanOpen)
-cv.imshow("grassOpen",grassOpen)
+#cv.imshow("oceanOpen",oceanOpen)
+#cv.imshow("grassOpen",grassOpen)
 #cv.imshow("forestOpen",forestOpen)
 #cv.imshow("fieldOpen",fieldOpen)
 #cv.imshow("wasteOpen",wasteOpen)
 #cv.imshow("mineOpen",mineOpen)
 
 #show the thresholded masks:
-cv.imshow("oceanMask",oceanMask)
-cv.imshow("grassMask",grassMask)
+#cv.imshow("oceanMask",oceanMask)
+#cv.imshow("grassMask",grassMask)
 #cv.imshow("forestMask",forestMask)
 #cv.imshow("fieldMask",fieldMask)
 #cv.imshow("wasteMask",wasteMask)
 #cv.imshow("mineMask",mineMask)
-cv.waitKey(0)
+#cv.waitKey(0)
 
 #Finding the biome of each square: 
 for i in range(5): #for each row
@@ -74,15 +74,15 @@ for i in range(5): #for each row
             for x in range(100): #for each pixel in row
                 if oceanOpen[y+i*100,x+j*100]!=0: #if the pixel looks like ocean
                     oceanValue+=1
-                elif grassMask[y+i*100,x+j*100]!=0: #if the pixel looks like grassLand
+                elif grassOpen[y+i*100,x+j*100]!=0: #if the pixel looks like grassLand
                     grassLandValue+=1
-                elif forestMask[y+i*100,x+j*100]!=0: #if the pixel looks like grassLand
+                elif forestOpen[y+i*100,x+j*100]!=0: #if the pixel looks like grassLand
                     forestValue+=1
-                elif fieldMask[y+i*100,x+j*100]!=0: #if the pixel looks like grassLand
+                elif fieldOpen[y+i*100,x+j*100]!=0: #if the pixel looks like grassLand
                     fieldValue+=1
-                elif wasteMask[y+i*100,x+j*100]!=0: #if the pixel looks like grassLand
+                elif wasteOpen[y+i*100,x+j*100]!=0: #if the pixel looks like grassLand
                     wasteValue+=1
-                elif mineMask[y+i*100,x+j*100]!=0: #if the pixel looks like grassLand
+                elif mineOpen[y+i*100,x+j*100]!=0: #if the pixel looks like grassLand
                     mineValue+=1
             if 1000>np.max([oceanValue,grassLandValue,forestValue,fieldValue,wasteValue,mineValue]): #if it is not typical for anything else, it's probably the king piece
                 board[i,j]="Ki"#kingpiece      
@@ -98,6 +98,8 @@ for i in range(5): #for each row
                 board[i,j]="Wa"#Wateland
             elif mineValue==np.max([oceanValue,grassLandValue,forestValue,fieldValue,wasteValue,mineValue]):
                 board[i,j]="Mi"#Mines
+        
+print(board)
 
 
 
@@ -133,6 +135,7 @@ for i, rowb in enumerate(board):
         cPos=[i,j]
         if pointb!="X": #hvis feltet ikke er brændt
             biomeBlobList.append(WildfireStart(cPos))#bruger WildfireStart til at få en blob som tilføjes til biombeBlobList
+
 print(biomeBlobList)
 print(board)
 
