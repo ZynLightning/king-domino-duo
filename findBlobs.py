@@ -85,15 +85,15 @@ mineOpen=cv.morphologyEx(mineMask,cv.MORPH_OPEN,kernel)
 
 #show the opened images:
 cv.imshow("oceanOpen",oceanOpen)
-#cv.imshow("grassOpen",grassOpen)
+cv.imshow("grassOpen",grassOpen)
 #cv.imshow("forestOpen",forestOpen)
 #cv.imshow("fieldOpen",fieldOpen)
 #cv.imshow("wasteOpen",wasteOpen)
 #cv.imshow("mineOpen",mineOpen)
 
 #show the thresholded masks:
-#cv.imshow("oceanMask",oceanMask)
-#cv.imshow("grassMask",grassMask)
+cv.imshow("oceanMask",oceanMask)
+cv.imshow("grassMask",grassMask)
 #cv.imshow("forestMask",forestMask)
 #cv.imshow("fieldMask",fieldMask)
 #cv.imshow("wasteMask",wasteMask)
