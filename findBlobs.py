@@ -9,8 +9,8 @@ def findBlobs(ImageName):
     board=np.zeros((5,5), dtype=str)
 
     #thresholds for the different biomes:
-    oceanMin=np.array([102, 0, 0]) #Lowhue, LowSat, LowVal
-    oceanMax=np.array([111, 255, 255])#HighHue, HighSat, HighVal
+    oceanMin=np.array([(144/255*180), 176, 0]) #Lowhue, LowSat, LowVal
+    oceanMax=np.array([(157/255*180), 255, 255])#HighHue, HighSat, HighVal
 
     grassMin=np.array([(53/255*180),0,130])
     grassMax=np.array([(87/255*180),255,255])
@@ -21,23 +21,27 @@ def findBlobs(ImageName):
     fieldMin=np.array([(26/255*180),223,168])
     fieldMax=np.array([(41/255*180),255,255])
 
-    wasteMin=np.array([(16/255*180),0,51])
-    wasteMax=np.array([(34/255*180),172,151])
+    wasteMin=np.array([(16/255*180),60,45])
+    wasteMax=np.array([(34/255*180),200,151])
 
-    mineMin=np.array([0,0,0])
-    mineMax=np.array([31,113,79])
-
+    mineMin1=np.array([0,0,0])
+    mineMax1=np.array([(49),113,79]) #Hue=69
+    
+    mineMin2=np.array([(228/255*180),0,0])
+    mineMax2=np.array([(242/255*180),113,79])
+    
     #laver thresholds på alle biomes:
     oceanMask=cv.inRange(HSVimage, oceanMin, oceanMax) 
     grassMask=cv.inRange(HSVimage,grassMin,grassMax)
     forestMask=cv.inRange(HSVimage,forestMin,forestMax)
     fieldMask=cv.inRange(HSVimage,fieldMin,fieldMax)
     wasteMask=cv.inRange(HSVimage,wasteMin,wasteMax)
-    mineMask=cv.inRange(HSVimage,mineMin,mineMax)
-
+    mineMask1=cv.inRange(HSVimage,mineMin1,mineMax1)
+    mineMask2=cv.inRange(HSVimage,mineMin2,mineMax2)
+    mineMask=cv.bitwise_or(mineMask1,mineMask2,mask=None)
     #create a kernel:
     #kernel = cv.getStructuringElement(cv.MORPH_RECT,(5,5)) #laver en rektangulær 5x5 kernel
-    kernel = cv.getStructuringElement(cv.MORPH_ELLIPSE,(5,5)) # laver en cirkulær 5x5 kernel
+    kernel = cv.getStructuringElement(cv.MORPH_ELLIPSE,(7,7)) # laver en cirkulær 5x5 kernel
 
     #first erode then dilate the masks, creating an opened image:
     oceanOpen=cv.morphologyEx(oceanMask,cv.MORPH_OPEN,kernel)
@@ -87,7 +91,7 @@ def findBlobs(ImageName):
                         wasteValue+=1
                     elif mineOpen[y+i*100,x+j*100]!=0: #if the pixel looks like grassLand
                         mineValue+=1
-            if 1000>np.max([oceanValue,grassLandValue,forestValue,fieldValue,wasteValue,mineValue]): #if it is not typical for anything else, it's probably the king piece
+            if 800>np.max([oceanValue,grassLandValue,forestValue,fieldValue,wasteValue,mineValue]): #if it is not typical for anything else, it's probably the king piece
                 board[i,j]="Ki"#kingpiece      
             elif oceanValue==np.max([oceanValue,grassLandValue,forestValue,fieldValue,wasteValue,mineValue]): #if there are more values for ocean than any other, then it's an ocean piece
                 board[i,j]="Oc"#Ocean

@@ -229,11 +229,3 @@ for i in range(len(boards)):
     else:
         print("Fail #"+str(i+1))
 print("succesrate= "+str(successes)+ "/"+str(len(boards)))
-    
-
-if np.all(findBlobs("boards/1.jpg")[1] == boards[0]):
-    print("SUCCESS!")
-else:
-    print("No luck :(")
-    print(boards[0])
-    print(findBlobs("boards/1.jpg")[1])
