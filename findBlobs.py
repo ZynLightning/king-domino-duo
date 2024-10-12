@@ -84,22 +84,23 @@ for i in range(5): #for each row
                     wasteValue+=1
                 elif mineOpen[y+i*100,x+j*100]!=0: #if the pixel looks like grassLand
                     mineValue+=1
-            if 1000>np.max([oceanValue,grassLandValue,forestValue,fieldValue,wasteValue,mineValue]): #if it is not typical for anything else, it's probably the king piece
-                board[i,j]="Ki"#kingpiece      
-            elif oceanValue==np.max([oceanValue,grassLandValue,forestValue,fieldValue,wasteValue,mineValue]): #if there are more values for ocean than any other, then it's an ocean piece
-                board[i,j]="Oc"#Ocean
-            elif grassLandValue==np.max([oceanValue,grassLandValue,forestValue,fieldValue,wasteValue,mineValue]):
-                board[i,j]="Gr"#Grassland
-            elif forestValue==np.max([oceanValue,grassLandValue,forestValue,fieldValue,wasteValue,mineValue]):
-                board[i,j]="Fo"#Forest
-            elif fieldValue==np.max([oceanValue,grassLandValue,forestValue,fieldValue,wasteValue,mineValue]):
-                board[i,j]="Ag"#Agriculture
-            elif wasteValue==np.max([oceanValue,grassLandValue,forestValue,fieldValue,wasteValue,mineValue]):
-                board[i,j]="Wa"#Wateland
-            elif mineValue==np.max([oceanValue,grassLandValue,forestValue,fieldValue,wasteValue,mineValue]):
-                board[i,j]="Mi"#Mines
+        if 1000>np.max([oceanValue,grassLandValue,forestValue,fieldValue,wasteValue,mineValue]): #if it is not typical for anything else, it's probably the king piece
+            board[i,j]="Ki"#kingpiece      
+        elif oceanValue==np.max([oceanValue,grassLandValue,forestValue,fieldValue,wasteValue,mineValue]): #if there are more values for ocean than any other, then it's an ocean piece
+            board[i,j]="Oc"#Ocean
+        elif grassLandValue==np.max([oceanValue,grassLandValue,forestValue,fieldValue,wasteValue,mineValue]):
+            board[i,j]="Gr"#Grassland
+        elif forestValue==np.max([oceanValue,grassLandValue,forestValue,fieldValue,wasteValue,mineValue]):
+            board[i,j]="Fo"#Forest
+        elif fieldValue==np.max([oceanValue,grassLandValue,forestValue,fieldValue,wasteValue,mineValue]):
+            board[i,j]="Ag"#Agriculture
+        elif wasteValue==np.max([oceanValue,grassLandValue,forestValue,fieldValue,wasteValue,mineValue]):
+            board[i,j]="Wa"#Wateland
+        elif mineValue==np.max([oceanValue,grassLandValue,forestValue,fieldValue,wasteValue,mineValue]):
+            board[i,j]="Mi"#Mines
         
-print(board)
+        
+#print(board)
 
 
 
@@ -136,7 +137,7 @@ for i, rowb in enumerate(board):
         if pointb!="X": #hvis feltet ikke er brændt
             biomeBlobList.append(WildfireStart(cPos))#bruger WildfireStart til at få en blob som tilføjes til biombeBlobList
 
-print(biomeBlobList)
+#print(biomeBlobList)
 print(board)
-
-print("done :)")
+#
+#print("done :)")
