@@ -42,7 +42,7 @@ def findBlobs(ImageName):
     
     #create a kernel:
     #kernel = cv.getStructuringElement(cv.MORPH_RECT,(5,5)) #laver en rektangulær 5x5 kernel
-    kernel = cv.getStructuringElement(cv.MORPH_ELLIPSE,(7,7)) # laver en cirkulær 5x5 kernel
+    kernel = cv.getStructuringElement(cv.MORPH_ELLIPSE,(7,7)) # laver en cirkulær 7x7 kernel
 
     #first erode then dilate the masks, creating an opened image:
     oceanOpen=cv.morphologyEx(oceanMask,cv.MORPH_OPEN,kernel)
