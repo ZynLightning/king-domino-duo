@@ -39,9 +39,10 @@ class Crown_Finder:
 class Crown:
     def __init__(self) -> None:
         self.grid = np.zeros((5,5), dtype=int)
+        self.crown_list = []
 
-
-game = cv.imread('4.jpg')
+board_source = 'King Domino dataset/Cropped and perspective corrected boards/'
+game = cv.imread(f'{board_source}16.jpg')
 hsv = cv.cvtColor(game, cv.COLOR_BGR2HSV)
 
 #   Object setup
@@ -57,6 +58,7 @@ waste = Tile_Type(f'{template_source}wasteland.tif', [(16/255*180),60,45], [(34/
 mine1 = Tile_Type(None, [0,0,0],[(49),113,79])
 mine2 = Tile_Type(None, [(228/255*180),0,0],[(242/255*180), 113,79])
 mine = Tile_Type(f'{template_source}mine.tif', [],[])
+table = Tile_Type(None, [(25/255*180), 166, 103], [(30/255*180), 255, 255])
 
 finder = Crown_Finder()
 crowns = Crown()
@@ -81,6 +83,8 @@ def find_tile_value(tile):
     mine2.create_mask(tile)
     mine2.perform_open(kernel.matrix)
     mine.mask = cv.bitwise_or(mine1.mask, mine2.mask, mask=None)
+    table.create_mask(tile)
+    table.perform_open(kernel.matrix)
 
     for y in range(rows):
         for x in range(cols):
@@ -96,6 +100,8 @@ def find_tile_value(tile):
                 waste.value += 1
             elif mine.mask[y,x] != 0:
                 mine.value += 1
+            elif table.mask[y,x] != 0:
+                table.value += 1
     return [ocean.value, grass.value, forest.value, field.value, waste.value, mine.value]
 
 def find_tile_type(values, row, col):
@@ -112,7 +118,7 @@ def find_tile_type(values, row, col):
     elif waste.value == np.max(values):
         grid.values[row, col] = 'W'
     elif mine.value == np.max(values):
-        grid.values[row, grid] = 'M'
+        grid.values[row, col] = 'M'
 
 def choose_templates(row, col):
     current_type = grid.values[row,col]
@@ -136,6 +142,7 @@ def choose_templates(row, col):
 #   Returns result from each
 def crown_matching(tile, tile_number, templates):
     coords = []
+    output = []
     
     for template in templates:
         res = finder.match(tile, template)
@@ -143,9 +150,10 @@ def crown_matching(tile, tile_number, templates):
         # cv.waitKey()
         coords = get_crown_coords(res)
         sorted = sort_coords(coords)
+        output.append(sorted) if len(sorted) > 0 else 0
         declare_found_crowns(sorted, tile_number) if len(sorted) > 0 else 0
+    return output
         
-
 def declare_found_crowns(sorted, tile):
     m = tile[0]
     n = tile[1]
@@ -155,8 +163,7 @@ def declare_found_crowns(sorted, tile):
         val += 1
 
     crowns.grid[m, n] = val
-
-
+    crowns.crown_list.append(tile)
 
 def sort_coords(coords):
 
@@ -224,15 +231,9 @@ for row in range(grid.rows):
         values = find_tile_value(hsv_tile)
         find_tile_type(values, row, col)
         choosen_templates = choose_templates(row, col)
-        found_coords = crown_matching(tile, [row, col], choosen_templates)
+
+        if grid.values[row, col] != 'K':
+            found_coords = crown_matching(tile, [row, col], choosen_templates)
         reset_values()  #   Note: important
-        
 
-
-# for crown in crowns.tile_coords:
-    # print(crown)
-
-
-print(crowns.grid)
-
-
+print(crowns.crown_list)
