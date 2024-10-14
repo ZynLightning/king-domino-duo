@@ -38,7 +38,8 @@ def findBlobs(ImageName):
     wasteMask=cv.inRange(HSVimage,wasteMin,wasteMax)
     mineMask1=cv.inRange(HSVimage,mineMin1,mineMax1)
     mineMask2=cv.inRange(HSVimage,mineMin2,mineMax2)
-    mineMask=cv.bitwise_or(mineMask1,mineMask2,mask=None)
+    mineMask=cv.bitwise_or(mineMask1,mineMask2,mask=None) #the mine biome spans over two very different hues, and so two masks are created with the different hues and put together.
+    
     #create a kernel:
     #kernel = cv.getStructuringElement(cv.MORPH_RECT,(5,5)) #laver en rektangulær 5x5 kernel
     kernel = cv.getStructuringElement(cv.MORPH_ELLIPSE,(7,7)) # laver en cirkulær 5x5 kernel

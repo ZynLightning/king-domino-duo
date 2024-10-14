@@ -1,8 +1,9 @@
 from findBlobs import *
-import glob
-files = glob.glob("Boards/*.jpg")
+#import glob
+#files = glob.glob("Boards/*.jpg")
 #print(findBlobs("boards/1.jpg")[1])
 successes=0
+#Boards for testing and optimizing. Currently the first 36:
 boards=[
 [['G', 'O', 'F', 'F', 'F'],
  ['G', 'F', 'F', 'F', 'G'],
@@ -221,11 +222,13 @@ boards=[
  ['O', 'A', 'O', 'G', 'O']],#36
 
 ]
-for i in range(len(boards)):
-    print(findBlobs("boards/"+str(i+1)+".jpg")[1])
-    if np.all(findBlobs("boards/"+str(i+1)+".jpg")[1] == boards[i]):
-        print("SUCCESS! #"+str(i+1))
+#Boards for veryfiyng the successrate:
+boardsVerify=[]
+for i in range(len(boards)): #for every board
+    print(findBlobs("boards/"+str(i+1)+".jpg")[1]) #print what the findBlobs function finds the board to be
+    if np.all(findBlobs("boards/"+str(i+1)+".jpg")[1] == boards[i]): #if the found board is the same as the real one print "SUCCESS! #n"
+        print("SUCCESS! #"+str(i+1)) 
         successes+=1
     else:
         print("Fail #"+str(i+1))
-print("succesrate= "+str(successes)+ "/"+str(len(boards)))
+print("succesrate= "+str(successes)+ "/"+str(len(boards))+ " = "+str(successes/len(boards)*100)+"%")
