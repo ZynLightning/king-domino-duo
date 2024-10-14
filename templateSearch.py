@@ -1,125 +1,238 @@
-#   1)  Go through each tile, one at a time and check for crown(s)
-#   2)  If found, safe tile number, and coordinate of the crown(s).
-#   3)  For each tile, make a counter that tells the number of crowns on a tile.
-#   4)  When all tiles have been checked, draw a target symbol on the main image.
-#   5)  Color the area of the crown instead of a target symbol.
-
 import numpy as np
 import cv2 as cv
 
-#   Image setup
-img = cv.imread('1.jpg')
-edges = cv.Canny(img, 100, 300)   #   Canny version of game map
+class Grid:
+    def __init__(self) -> None:
+        self.values = np.zeros((5,5), dtype=str)
+        self.rows = self.values.shape[0]
+        self.cols = self.values.shape[1]
 
-#   Template setup
-template_0 = edges[108:129, 308:335]    #   Template, 0 degree roation
-template_90 = cv.rotate(template_0, cv.ROTATE_90_CLOCKWISE)
-template_180 = cv.rotate(template_0, cv.ROTATE_180)
-template_270 = cv.rotate(template_90, cv.ROTATE_180)
-templates = [template_0, template_90, template_180, template_270]   #   All possible templates
-method = getattr(cv, 'TM_CCOEFF_NORMED')    #   Method for template matching
+class Kernel:
+    def __init__(self) -> None:
+        self.matrix = cv.getStructuringElement(cv.MORPH_ELLIPSE,(7,7))
 
-def find_coordinates(results):
+class Tile_Type:
+    def perform_open(self, kernel):
+        self.open = cv.morphologyEx(self.mask, cv.MORPH_OPEN, kernel)
+
+    def create_mask(self, hsv_input):
+        self.mask = cv.inRange(hsv_input, self.min, self.max)
+
+    def __init__(self, template_type, min, max) -> None:    #   inputs are max and min value of hsv.
+        self.min = np.array(min)
+        self.max = np.array(max)
+        self.value = 0
+
+        self.template_0 = cv.imread(template_type)
+        self.template_90 = cv.rotate(self.template_0, cv.ROTATE_90_CLOCKWISE)
+        self.template_180 = cv.rotate(self.template_0, cv.ROTATE_180)
+        self.template_270 = cv.rotate(self.template_0, cv.ROTATE_90_COUNTERCLOCKWISE)
+        self.templates = [self.template_0, self.template_90, self.template_180, self.template_270]
+
+class Crown_Finder:
+    def match(self, tile_input, template_input):
+        return cv.matchTemplate(tile_input, template_input, self.method)
     
+    def __init__(self) -> None:
+        self.method = getattr(cv, 'TM_CCOEFF_NORMED')
+
+class Crown:
+    def __init__(self) -> None:
+        self.grid = np.zeros((5,5), dtype=int)
+
+
+game = cv.imread('4.jpg')
+hsv = cv.cvtColor(game, cv.COLOR_BGR2HSV)
+
+#   Object setup
+kernel = Kernel()
+grid = Grid()
+
+template_source = 'templates/'  #   Sets a source for template directory.
+ocean = Tile_Type(f'{template_source}ocean.tif', [(144/255*180), 176, 0], [(157/255*180), 255, 255])
+grass = Tile_Type(f'{template_source}grass.tif', [(53/255*180),0,130], [(87/255*180),255,255])
+forest = Tile_Type(f'{template_source}forest.tif', [(49/255*180),0,0], [(87/255*180),210,85])
+field = Tile_Type(f'{template_source}agri.tif', [(26/255*180),223,168], [(41/255*180),255,255])
+waste = Tile_Type(f'{template_source}wasteland.tif', [(16/255*180),60,45], [(34/255*180),200,151])
+mine1 = Tile_Type(None, [0,0,0],[(49),113,79])
+mine2 = Tile_Type(None, [(228/255*180),0,0],[(242/255*180), 113,79])
+mine = Tile_Type(f'{template_source}mine.tif', [],[])
+
+finder = Crown_Finder()
+crowns = Crown()
+
+
+def find_tile_value(tile):
+    rows = 100
+    cols = 100
+
+    ocean.create_mask(tile)
+    ocean.perform_open(kernel.matrix)
+    grass.create_mask(tile)
+    grass.perform_open(kernel.matrix)
+    forest.create_mask(tile)
+    forest.perform_open(kernel.matrix)
+    field.create_mask(tile)
+    field.perform_open(kernel.matrix)
+    waste.create_mask(tile)
+    waste.perform_open(kernel.matrix)
+    mine1.create_mask(tile)
+    mine1.perform_open(kernel.matrix)
+    mine2.create_mask(tile)
+    mine2.perform_open(kernel.matrix)
+    mine.mask = cv.bitwise_or(mine1.mask, mine2.mask, mask=None)
+
+    for y in range(rows):
+        for x in range(cols):
+            if ocean.open[y,x] != 0:
+                ocean.value += 1
+            elif grass.open[y,x] != 0:
+                grass.value += 1
+            elif forest.mask[y,x] != 0:
+                forest.value += 1
+            elif field.mask[y,x] != 0:
+                field.value += 1
+            elif waste.mask[y,x] != 0:
+                waste.value += 1
+            elif mine.mask[y,x] != 0:
+                mine.value += 1
+    return [ocean.value, grass.value, forest.value, field.value, waste.value, mine.value]
+
+def find_tile_type(values, row, col):
+    if 800>np.max(values):
+        grid.values[row, col] = 'K'
+    elif ocean.value == np.max(values):
+        grid.values[row, col] = 'O'
+    elif grass.value == np.max(values):
+        grid.values[row, col] = 'G'
+    elif forest.value == np.max(values):
+        grid.values[row, col] = 'F'
+    elif field.value == np.max(values):
+        grid.values[row, col] = 'A'
+    elif waste.value == np.max(values):
+        grid.values[row, col] = 'W'
+    elif mine.value == np.max(values):
+        grid.values[row, grid] = 'M'
+
+def choose_templates(row, col):
+    current_type = grid.values[row,col]
+    template = 0
+
+    if current_type == 'O':
+        template = ocean.templates
+    elif current_type == 'G':
+        template = grass.templates
+    elif current_type == 'F':
+        template = grass.templates
+    elif current_type == 'A':
+        template = field.templates
+    elif current_type == 'W':
+        template = waste.templates
+    elif current_type == 'M':
+        template = mine.templates
     
-    for result in results:
-        j,i,l = result.shape
-        output = []
+    return template
 
-        for y in range(j):
-            for x in range(i):
-                pixel = result[y,x]
-                if pixel[0] == 255:
-                    coord = [y,x]
-                    output.append(coord)
+#   Returns result from each
+def crown_matching(tile, tile_number, templates):
+    coords = []
     
-    return output
-
-
-
-def delete_noice(output):
-    j,i,l = output.shape
-
-    for y in range(j):
-        for x in range(i):
-            pixel = output[y,x]
-
-            if pixel[0] == 255 and pixel[1] == 255 and pixel[2] == 255:
-
-                crown_found = False
-
-                position_list = [[y,x+1], [y+1,x], [y,x-1], [y-1,x]]
-                
-                for num in range(3):
-                    p,q = position_list[num]
-                    if p > y:
-                        p = y
-                    elif q > x:
-                        q = x
-                    r_pixel = output[p,q]
-
-                    if pixel[0] == r_pixel[0] and pixel[1] == r_pixel[1] and pixel[2] == r_pixel[2]:
-                        crown_found = True
-                
-                if crown_found == False:
-                    output[y,x] = (0,0,0)
-    return output
-
-def get_threshold(res):
-    j,i = res.shape
-    output = np.zeros((j,i, 3), np.uint8)
-
-    for y in range(j):
-        for x in range(i):
-            if 0.21 < res[y,x]:
-                output[y,x] = (255,255,255)
-    
-    return output
-
-def morp_open(threshold):
-    kernel = cv.getStructuringElement(cv.MORPH_ELLIPSE,(3,3))
-    return cv.morphologyEx(threshold,cv.MORPH_OPEN,kernel)
-
-
-#   To control value of amount of crown(s)
-map_tile_values = np.zeros((5,5))
-rows, cols = [5,5]
-coordinates = []
-
-#   Go through each tile, find crowns, save their correct coordinate.
-for row in range(rows):
-    # print(f"Row: {row}")
-
-    for col in range(cols):
-
-        # print(f"Column: {col}")
-        tile = edges[((row+1)*100)-100:(row+1)*100,((col+1)*100)-100:(col+1)*100]
-        tile_results = []
-        
-        # cv.imshow("Tiles", tile)
+    for template in templates:
+        res = finder.match(tile, template)
+        # cv.imshow("Res", res)
         # cv.waitKey()
-
-        for template in templates:
-            res = cv.matchTemplate(tile, template, method)
-            threshold = get_threshold(res)
-            reduced = delete_noice(threshold)
-            tile_results.append(reduced)
-
-            cv.imwrite(f"tiles/Reduced[{row+1},{col+1}].png", reduced)
-        
-        coordinates.append(find_coordinates(tile_results))
-        
-        print(coordinates)
-        # cv.imshow("res", res)
-        # cv.waitKey()
+        coords = get_crown_coords(res)
+        sorted = sort_coords(coords)
+        declare_found_crowns(sorted, tile_number) if len(sorted) > 0 else 0
         
 
+def declare_found_crowns(sorted, tile):
+    m = tile[0]
+    n = tile[1]
+    val = 0
+
+    for sort in sorted:
+        val += 1
+
+    crowns.grid[m, n] = val
 
 
 
+def sort_coords(coords):
+
+    sorted = []
+    counter = 0
+
+    #   create to be sorted list.
+    for coord in coords:
+        yn = coord[0]
+        xn = coord[1]
+
+        if len(sorted) == 0:    #   if empty add first element found
+            sorted.append(coord)
+        elif len(sorted) > 0:
+            current = sorted[counter]
+            y = current[0]
+            x = current[1]
+
+            if xn - x > 10 or yn - y > 10:
+                sorted.append(coord)
+                counter += 1
+        
+    return sorted
+        
+def get_crown_coords(res):
+    coords = []
+    threshold = 0.7
+    rows, cols = res.shape
+
+    for y in range(rows):
+            for x in range(cols):
+                pixel = res[y,x]
+                
+                if pixel > threshold:
+                    coords.append([y,x])
+
+          
+    return coords
+
+def give_tile_coords(row,col):
+    return ((row+1)*100)-100, ((row+1)*100), ((col+1)*100)-100, ((col+1)*100)
+
+def reset_values():
+    ocean.value = 0
+    forest.value = 0
+    field.value = 0
+    grass.value = 0
+    waste.value = 0
+    mine.value = 0
+
+def set_final_coordinate(y, x):
+
+    pass
 
 
-# cv.waitKey()
+for row in range(grid.rows):
+    for col in range(grid.cols):
 
+        ys, ye, xs, xe = give_tile_coords(row, col)
+
+        tile = game[ys:ye, xs:xe]
+        hsv_tile = hsv[ys:ye, xs:xe]
+
+        #   Find tile type and insert into tile_type
+        values = find_tile_value(hsv_tile)
+        find_tile_type(values, row, col)
+        choosen_templates = choose_templates(row, col)
+        found_coords = crown_matching(tile, [row, col], choosen_templates)
+        reset_values()  #   Note: important
+        
+
+
+# for crown in crowns.tile_coords:
+    # print(crown)
+
+
+print(crowns.grid)
 
 
