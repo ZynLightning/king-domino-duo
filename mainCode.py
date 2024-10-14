@@ -1,6 +1,10 @@
-from findBlobs import *
-#print(findBlobs("Boards/1.jpg"))
+from findBlobs import blobs, biomes
 
-boardNumber=input("Which board do you want counted?")
-Blobs=findBlobs("boards/"+str(boardNumber)+".jpg")[0]
-print(Blobs)
+biome = biomes()
+blob=blobs()
+
+boardNumber="1"#input("Which board do you want counted?")
+biome.findBiomes(f"boards/{boardNumber}.jpg")
+board=biome.findBoard()
+bloblist=blob.wildfire()
+print(bloblist)
