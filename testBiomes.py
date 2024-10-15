@@ -1,4 +1,4 @@
-from findBlobs import *
+from findPatches import *
 #import glob
 #files = glob.glob("Boards/*.jpg")
 #print(findBlobs("boards/1.jpg")[1])
@@ -223,10 +223,14 @@ boards=[
 
 ]
 #Boards for veryfiyng the successrate:
-boardsVerify=[]
+
+
+
 for i in range(len(boards)): #for every board
-    print(findBlobs("boards/"+str(i+1)+".jpg")[1]) #print what the findBlobs function finds the board to be
-    if np.all(findBlobs("boards/"+str(i+1)+".jpg")[1] == boards[i]): #if the found board is the same as the real one print "SUCCESS! #n"
+    biomes().findBiomes("boards/"+str(i+1)+".jpg")
+    biomes().findBoard()
+    print(board) #print what the findBlobs function finds the board to be
+    if np.all(board) == boards[i]: #if the found board is the same as the real one print "SUCCESS! #n"
         print("SUCCESS! #"+str(i+1)) 
         successes+=1
     else:

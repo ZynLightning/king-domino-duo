@@ -1,8 +1,8 @@
 import cv2 as cv
-from findBlobs import blobs, biomes
+from findPatches import Patches, biomes
 from templateSearch import Template_Searcher
 biome = biomes()
-blob=blobs()
+blob=Patches()
 ts = Template_Searcher()
 pointList=[]
 for n in range(74):

@@ -123,15 +123,15 @@ class biomes:
         return(board)
 
 
-class blobs: #brug blob-analyse til at finde sammenhængende biomes i vores matrix
+class Patches: #brug Patch-analyse til at finde sammenhængende biomes i vores matrix
     
-    def WildfireStart(self,cPos):#kører for at skabe hver blob
+    def WildfireStart(self,cPos):#kører for at skabe hver Patch
     
-        blob=[] #liste som bliver lavet for hver blob og bliver tilføjet til for hvert felt
-        burnList=[] #liste over felter som skal brændes. Indeholder også typen af biome, vi leder efter i denne blob
+        Patch=[] #liste som bliver lavet for hver Patch og bliver tilføjet til for hvert felt
+        burnList=[] #liste over felter som skal brændes. Indeholder også typen af biome, vi leder efter i denne Patch
         burnList.append(board[cPos[0],cPos[1]]) #tilføjer typen af biome vi leder efter
         
-        while len(burnList)>0: #loop som fortsætter indtil blobben er fuldført og burnList dermed er tom
+        while len(burnList)>0: #loop som fortsætter indtil Patchben er fuldført og burnList dermed er tom
             board[cPos[0],cPos[1]]="X" #brænder current position
             
             if cPos[0]!=0 and board[cPos[0]-1,cPos[1]]==burnList[0] and not ([cPos[0]-1,cPos[1]] in burnList): #Er feltet over cPos det samme biome?
@@ -142,17 +142,17 @@ class blobs: #brug blob-analyse til at finde sammenhængende biomes i vores matr
                 burnList.append([cPos[0]+1,cPos[1]]) #Tilføj til burnList
             if cPos[1]!=4 and board[cPos[0],cPos[1]+1]==burnList[0] and not ([cPos[0],cPos[1]+1] in burnList): #Er feltet til højre for cPos det samme biome?
                 burnList.append([cPos[0],cPos[1]+1]) #Tilføj til burnList
-            blob.append(cPos) #Tilføj til den nuværende blob
+            Patch.append(cPos) #Tilføj til den nuværende Patch
             cPos=burnList[len(burnList)-1] #hop til sidst tilføjede koordinat i burnList
             burnList.pop(len(burnList)-1) #fjern sidst tilføjede koordinat fra burnList
-        return blob #returner nuværende blob
+        return Patch #returner nuværende Patch
     
-    def wildfire(self): #finder bolbs, starter WildfireStart og samler blobs til en samlet liste.
-        biomeBlobList=[] #samlet liste over blobs
+    def wildfire(self): #finder bolbs, starter WildfireStart og samler Patchs til en samlet liste.
+        biomePatchList=[] #samlet liste over Patches
         for i, rowb in enumerate(board):
             for j, pointb in enumerate(rowb):
                 cPos=[i,j]
                 if pointb!="X": #hvis feltet ikke er brændt
-                    biomeBlobList.append(blobs().WildfireStart(cPos))#bruger WildfireStart til at få en blob som tilføjes til biombeBlobList
-        return(biomeBlobList)
+                    biomePatchList.append(Patches().WildfireStart(cPos))#bruger WildfireStart til at få en blob som tilføjes til biombePatchList
+        return(biomePatchList)
 
