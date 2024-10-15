@@ -224,13 +224,13 @@ boards=[
 ]
 #Boards for veryfiyng the successrate:
 
-
+biome = biomes()
 
 for i in range(len(boards)): #for every board
-    biomes().findBiomes("boards/"+str(i+1)+".jpg")
-    biomes().findBoard()
+    biome.findBiomes("boards/"+str(i+1)+".jpg")
+    board=biome.findBoard()
     print(board) #print what the findBlobs function finds the board to be
-    if np.all(board) == boards[i]: #if the found board is the same as the real one print "SUCCESS! #n"
+    if np.array_equal(board,boards[i]): #if the found board is the same as the real one print "SUCCESS! #n"
         print("SUCCESS! #"+str(i+1)) 
         successes+=1
     else:
